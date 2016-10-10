@@ -64,11 +64,13 @@
     firefox = {
      enableGoogleTalkPlugin = true;
      enableAdobeFlash = true;
+     jre = true;
     };
 
     chromium = {
      enablePepperFlash = true; # Chromium removed support for Mozilla (NPAPI) plugins so Adobe Flash no longer works
      enablePepperPDF = true;
+     jre = true;
     };
 
   };
