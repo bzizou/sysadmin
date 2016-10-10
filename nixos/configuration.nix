@@ -11,7 +11,8 @@
     ];
 
   # Use the gummiboot efi boot loader.
-  boot.loader.gummiboot.enable = true;
+  #boot.loader.gummiboot.enable = true;
+  boot.loader.systemd-boot.enable = true; #new form
   boot.loader.efi.canTouchEfiVariables = true;
 
   boot.kernelPackages = pkgs.linuxPackages_4_7;
@@ -57,6 +58,10 @@
      acpitool
   ];
 
+  # Set common environment variables
+  environment.variables.EDITOR = "vim";
+ 
+  # Enable browsers plugins
   nixpkgs.config = {
 
     allowUnfree = true;
@@ -75,9 +80,8 @@
 
   };
 
+  # Enable docker virtualization
   virtualisation.docker.enable = true;
-
-  # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
   # services.openssh.enable = true;
@@ -97,7 +101,7 @@
     services.xserver.layout = "fr";
     services.xserver.xkbVariant = "latin9";
     services.xserver.xkbOptions = "eurosign:e";
-    services.xserver.synaptics.enable = true;
+    #services.xserver.synaptics.enable = true;
     services.xserver.synaptics.twoFingerScroll = true;
     services.xserver.exportConfiguration = true;
     services.xserver.displayManager.sessionCommands = ''
@@ -107,13 +111,12 @@
       ksuperkey -e "Super_L=Control_L|F10" 
       '';
 
- 
 
   # Enable the KDE Desktop Environment.
    services.xserver.displayManager.kdm.enable = true;
    services.xserver.desktopManager.kde5.enable = true;
   #  services.xserver.displayManager.gdm.enable = true;
-   services.xserver.desktopManager.gnome3.enable = true;
+  # services.xserver.desktopManager.gnome3.enable = true;
 
   # Enable network manager
     networking.networkmanager.enable = true;
@@ -126,6 +129,6 @@
   # };
 
   # The NixOS release to be compatible with for stateful data such as databases.
-  system.stateVersion = "16.03";
+  system.stateVersion = "16.09";
 
 }
