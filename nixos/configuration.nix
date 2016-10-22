@@ -33,7 +33,8 @@
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
   environment.systemPackages = with pkgs; [
-     vim 
+     vim
+     vimPlugins.pathogen 
      ethtool
      nox
      pciutils
@@ -56,8 +57,25 @@
      which
      avahi
      acpitool
+     phonon
+     gitAndTools.gitFull
+     wget
+     evince
+     libreoffice
+     mplayer
   ];
 
+  # Sound config for B&O audio
+  hardware.pulseaudio.enable = true;
+  hardware.pulseaudio.package = pkgs.pulseaudioFull;
+  hardware.pulseaudio.extraConfig = ''
+    load-module module-equalizer-sink
+    load-module module-dbus-protocol
+  '';
+  #sound.extraConfig = ''
+  #   options snd-hda-intel model=auto position_fix=0
+  #'';
+ 
   # Set common environment variables
   environment.variables.EDITOR = "vim";
  
@@ -101,14 +119,14 @@
     services.xserver.layout = "fr";
     services.xserver.xkbVariant = "latin9";
     services.xserver.xkbOptions = "eurosign:e";
-    #services.xserver.synaptics.enable = true;
+    services.xserver.synaptics.enable = true;
     services.xserver.synaptics.twoFingerScroll = true;
     services.xserver.exportConfiguration = true;
     services.xserver.displayManager.sessionCommands = ''
       # Start network manager applet
       #${pkgs.networkmanagerapplet}/bin/nm-applet &
       # Make the Meta key act into KDE like into Gnome
-      ksuperkey -e "Super_L=Control_L|F10" 
+      ksuperkey -e "Super_L=Control_L|F8" 
       '';
 
 
@@ -121,6 +139,9 @@
   # Enable network manager
     networking.networkmanager.enable = true;
 
+
+  # Enable parallel build
+  nix.maxJobs = 8 ;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   # users.extraUsers.guest = {
