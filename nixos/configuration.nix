@@ -63,6 +63,12 @@
      evince
      libreoffice
      mplayer
+     binutils
+     cpufrequtils
+     pidgin
+     geeqie
+     gimp
+     dia
   ];
 
   # Sound config for B&O audio
@@ -110,6 +116,10 @@
   # For network printing
     services.avahi.enable = true;
     services.printing.browsing = true;
+    services.printing.browsedConf = ''
+      BrowseRemoteProtocols cups
+      BrowsePoll print.imag.fr:631
+    '';
 
   # Enable the X11 windowing system.
     services.xserver.enable = true;
