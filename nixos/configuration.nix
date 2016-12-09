@@ -15,7 +15,7 @@
   boot.loader.systemd-boot.enable = true; #new form
   boot.loader.efi.canTouchEfiVariables = true;
 
-  boot.kernelPackages = pkgs.linuxPackages_4_7;
+  boot.kernelPackages = pkgs.linuxPackages_4_8;
 
   networking.hostName = "bart"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -69,6 +69,8 @@
      geeqie
      gimp
      dia
+     xfce.xfwm4
+     telnet
   ];
 
   # Sound config for B&O audio
@@ -127,8 +129,8 @@
     services.xfs.enable = true;
     fonts.enableFontDir = true;
     services.xserver.layout = "fr";
-    services.xserver.xkbVariant = "latin9";
-    services.xserver.xkbOptions = "eurosign:e";
+    #services.xserver.xkbVariant = "latin9";
+    #services.xserver.xkbOptions = "eurosign:e";
     services.xserver.synaptics.enable = true;
     services.xserver.synaptics.twoFingerScroll = true;
     services.xserver.exportConfiguration = true;
@@ -152,6 +154,9 @@
 
   # Enable parallel build
   nix.maxJobs = 8 ;
+
+  # 
+  nix.useSandbox = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   # users.extraUsers.guest = {
