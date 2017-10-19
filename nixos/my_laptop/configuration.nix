@@ -15,7 +15,7 @@
   boot.loader.systemd-boot.enable = true; #new form
   boot.loader.efi.canTouchEfiVariables = true;
 
-  boot.kernelPackages = pkgs.linuxPackages_4_8;
+  boot.kernelPackages = pkgs.linuxPackages_4_9;
 
   networking.hostName = "bart"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -29,6 +29,9 @@
 
   # Set your time zone.
     time.timeZone = "Europe/Paris";
+
+  # Bluetooth
+  hardware.bluetooth.enable = true;
 
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
@@ -48,6 +51,7 @@
      firefox
      #networkmanagerapplet
      bluez-tools
+     bluez
      xorg.xbacklight
      ethtool
      gnupg
@@ -71,6 +75,21 @@
      dia
      xfce.xfwm4
      telnet
+     gimp-with-plugins
+     hunspellDicts.fr-any
+     tightvnc
+     inkscape
+     unzip
+     subversion
+     unrar
+     vlc
+     #kde5.kdenlive
+     bc
+     glxinfo
+     imagemagick
+     unetbootin
+     unrar
+     xournal
   ];
 
   # Sound config for B&O audio
@@ -92,19 +111,42 @@
 
     allowUnfree = true;
 
-    firefox = {
-     enableGoogleTalkPlugin = true;
-     enableAdobeFlash = true;
-     jre = true;
-    };
+########################################################   
+## This part should install browsers flash plugin
+## But as the flashplugin is often outdated, and source no more available, 
+## it may break the nixos-rebuild on updates. Solution is to use the unstable channel.
+## So, I prefer doing this outside the configuration.nix by using the system wide root profile:
+##     [root@bart:~]# nix-channel --add https://nixos.org/channels/nixos-unstable unstable
+##     [root@bart:~]# echo "{ chromium = { enablePepperFlash = true; }; }" > ~/.nixpkgs/config.nix
+##     [root@bart:~]# nix-env -i -A unstable.chromium
+########################################################   
+##
+#    firefox = {
+#     enableGoogleTalkPlugin = true;
+#     enableAdobeFlash = true;
+#     jre = true;
+#    };
 
-    chromium = {
-     enablePepperFlash = true; # Chromium removed support for Mozilla (NPAPI) plugins so Adobe Flash no longer works
-     enablePepperPDF = true;
-     jre = true;
-    };
+#    chromium = {
+#     enablePepperFlash = true; # Chromium removed support for Mozilla (NPAPI) plugins so Adobe Flash no longer works
+#     enablePepperPDF = true;
+#     jre = true;
+#    };
+# 
+## Attempt to solve the outdated flash plugin file download failure:
+#    packageOverrides = pkgs: rec {
+#       flashplayer-ppapi = pkgs.stdenv.lib.overrideDerivation pkgs.flashplayer-ppapi (oldAttrs: {
+#          name = "flashplayer-ppapi";
+#          src = pkgs.fetchurl {
+#            url = "https://fpdownload.adobe.com/pub/flashplayer/pdc/27.0.0.130/flash_player_ppapi_linux.x86_64.tar.gz";
+#            sha256 = "1bl4y665a4rq4pw67pl3hyd4234p9j8lgv2853jh2pk5gbmdz6xw";
+#          };
+#       });
+#    };
+#
+# #####################################################   
+};
 
-  };
 
   # Enable docker virtualization
   virtualisation.docker.enable = true;
@@ -143,17 +185,19 @@
 
 
   # Enable the KDE Desktop Environment.
-   services.xserver.displayManager.kdm.enable = true;
-   services.xserver.desktopManager.kde5.enable = true;
+   services.xserver.displayManager.sddm.enable = true;
+   services.xserver.desktopManager.plasma5.enable = true;
   #  services.xserver.displayManager.gdm.enable = true;
   # services.xserver.desktopManager.gnome3.enable = true;
 
   # Enable network manager
     networking.networkmanager.enable = true;
 
-
   # Enable parallel build
   nix.maxJobs = 8 ;
+
+  # Virtualbox
+  virtualisation.virtualbox.host.enable = true;
 
   # 
   nix.useSandbox = true;
@@ -165,6 +209,8 @@
   # };
 
   # The NixOS release to be compatible with for stateful data such as databases.
-  system.stateVersion = "16.09";
+  system.stateVersion = "17.03";
+
+  services.locate.enable = true;
 
 }
