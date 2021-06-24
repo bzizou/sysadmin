@@ -3,6 +3,9 @@ Using tensorflow and Keras with NIX
 
 This method is ok for the GRICAD "bigfoot" platform. It might run elsewhere...
 
+Installation
+------------
+
 ```
 mkdir tensorflow
 cd tensorflow
@@ -10,8 +13,13 @@ wget https://raw.githubusercontent.com/bzizou/sysadmin/master/tensorflow_with_ni
 nix-shell -I "nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.05.tar.gz"
 # (You can change nixpkgs version if needed above)
 # (You can also change Cuda version into the default.nix file)
-pip install tensorflow keras-nightly
-# (You can change tensorflow version, for example: pip install tensorflow==2.3 keras==2.3.1)
+pip install tensorflow tensorflow-datasets
+```
+
+You can specify a different version for Tensorflow:
+
+```
+pip install tensorflow==2.3 tensorflow-datasets
 ```
 
 Hello world test:
@@ -45,18 +53,34 @@ tf.Tensor(b'HelloWorld', shape=(), dtype=string)
 >>>
 ```
 
+Keras is integrated into Tensorflow v2:
+
+```
+>>> from tensorflow import keras
+```
+
+Runtime
+-------
+
+Example:
+
+```
+cd ~/tensorflow
+export NIX_PATH="nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.05.tar.gz"
+nix-shell --command 'python mnist.py'
+```
 
 Working combinations as of 24 June 2021
 ---------------------------------------
 
 - Cuda 11.2, cuddn-8.1.1
 
-pip install tensorflow keras-nightly
+pip install tensorflow
 
 - Cuda 10.1, cudnn-7.6.3
 
 default.nix: cudatoolkit_10_1 (in place of cudatoolkit_11)
 
-pip install tensorflow==2.3 keras==2.3.1
+pip install tensorflow==2.3
 
 
