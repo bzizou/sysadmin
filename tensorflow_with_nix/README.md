@@ -1,5 +1,5 @@
-Using tensorflow with NIX
-=========================
+Using tensorflow and Keras with NIX
+===================================
 
 This method is ok for the GRICAD "bigfoot" platform. It might run elsewhere...
 
@@ -42,4 +42,19 @@ To enable them in other operations, rebuild TensorFlow with the appropriate comp
 tf.Tensor(b'HelloWorld', shape=(), dtype=string)
 >>>
 ```
+
+
+Working combinations as of 24 June 2021
+---------------------------------------
+
+- Cuda 11.2, cuddn-8.1.1
+
+pip install tensorflow keras-nightly
+
+- Cuda 10.1, cudnn-7.6.3
+
+default.nix: cudatoolkit_10_1 (in place of cudatoolkit_11)
+
+pip install tensorflow==2.3 keras==2.3.1
+
 
