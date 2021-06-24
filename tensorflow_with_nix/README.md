@@ -13,13 +13,13 @@ wget https://raw.githubusercontent.com/bzizou/sysadmin/master/tensorflow_with_ni
 nix-shell -I "nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.05.tar.gz"
 # (You can change nixpkgs version if needed above)
 # (You can also change Cuda version into the default.nix file)
-pip install tensorflow tensorflow-datasets
+[nix-shell:~/tensorflow]$  pip install tensorflow tensorflow-datasets
 ```
 
 You can specify a different version for Tensorflow:
 
 ```
-pip install tensorflow==2.3 tensorflow-datasets
+[nix-shell:~/tensorflow]$ pip install tensorflow==2.3 tensorflow-datasets
 ```
 
 Hello world test:
