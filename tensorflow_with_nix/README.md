@@ -9,7 +9,9 @@ cd tensorflow
 wget https://raw.githubusercontent.com/bzizou/sysadmin/master/tensorflow_with_nix/default.nix
 nix-shell -I "nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.05.tar.gz"
 # (You can change nixpkgs version if needed above)
+# (You can also change Cuda version into the default.nix file)
 pip install tensorflow keras-nightly
+# (You can change tensorflow version, for example: pip install tensorflow==2.3 keras==2.3.1)
 ```
 
 Hello world test:
