@@ -9,7 +9,7 @@ cd tensorflow
 wget https://raw.githubusercontent.com/bzizou/sysadmin/master/tensorflow_with_nix/default.nix
 nix-shell -I "nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.05.tar.gz"
 # (You can change nixpkgs version if needed above)
-pip install keras-nightly tf-nightly
+pip install tensorflow keras-nightly
 ```
 
 Hello world test:
