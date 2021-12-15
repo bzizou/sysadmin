@@ -10,35 +10,140 @@
       ./hardware-configuration.nix
     ];
 
-  # Use the gummiboot efi boot loader.
-  #boot.loader.gummiboot.enable = true;
-  boot.loader.systemd-boot.enable = true; #new form
+  # Use the systemd-boot EFI boot loader.
+  boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  boot.kernelPackages = pkgs.linuxPackages_4_9;
+  # Enable ntfs
+  boot.supportedFilesystems = [ "ntfs" ];
+
+  security.pam.enableEcryptfs = true;
 
   networking.hostName = "bart"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
-  # Select internationalisation properties.
-   i18n = {
-     consoleFont = "Lat2-Terminus16";
-     consoleKeyMap = "fr";
-     defaultLocale = "en_US.UTF-8";
-   };
+  networking.extraHosts =
+    ''
+      176.168.121.32 maison home
+    '';
 
   # Set your time zone.
-    time.timeZone = "Europe/Paris";
+  time.timeZone = "Europe/Paris";
+
+  # The global useDHCP flag is deprecated, therefore explicitly set to false here.
+  # Per-interface useDHCP will be mandatory in the future, so this generated config
+  # replicates the default behaviour.
+  networking.useDHCP = false;
+  networking.interfaces.wlp0s20f3.useDHCP = true;
+
+  # Configure network proxy if necessary
+  # networking.proxy.default = "http://user:password@proxy:port/";
+  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
+
+  # Select internationalisation properties.
+  i18n.defaultLocale = "en_US.UTF-8";
+  console = {
+     #font = "Lat2-Terminus32";
+     font = "Lat2-Terminus16";
+     keyMap = "fr";
+  };
+
+  # Enable the X11 windowing system.
+  services.xserver.enable = true;
 
   # Bluetooth
   hardware.bluetooth.enable = true;
+ 
+  # Enable the GNOME Desktop Environment.
+  services.xserver.displayManager.gdm.enable = true;
+  services.xserver.displayManager.gdm.wayland = false;
+  services.xserver.desktopManager.gnome.enable = true;
+  
+  # Configure keymap in X11
+  services.xserver.layout = "fr";
+  services.xserver.xkbOptions = "eurosign:e";
 
-  # List packages installed in system profile. To search by name, run:
-  # $ nix-env -qaP | grep wget
+  # Enable CUPS to print documents.
+  services.printing.enable = true;
+  services.avahi.enable = true;
+  services.printing.browsing = true;
+  services.printing.drivers = [ pkgs.hplip ];
+
+  # For browsing
+  services.avahi.nssmdns = true;
+  services.avahi.domainName = "arcadia";
+  services.avahi.extraServiceFiles = 
+    {
+    smb = ''
+      <?xml version="1.0" standalone='no'?><!--*-nxml-*-->
+      <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+      <service-group>
+        <name replace-wildcards="yes">%h</name>
+        <service>
+          <type>_smb._tcp</type>
+          <port>445</port>
+        </service>
+      </service-group>
+    '';
+    };
+  services.samba.enable = true;
+  services.samba.enableNmbd = true;
+  
+  # Enable sound.
+  sound.enable = true;
+  hardware.pulseaudio.enable = true;
+
+  # Enable touchpad support (enabled default in most desktopManager).
+  services.xserver.libinput.enable = true;
+
+  # Define a user account. Don't forget to set a password with ‘passwd’.
+  # users.users.jane = {
+  #   isNormalUser = true;
+  #   extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+  # };
+
+  users.extraUsers.bzizou = {
+    extraGroups = [ "audio" "docker" "wheel" ];
+    isNormalUser = true;
+  };
+
+  # List packages installed in system profile. To search, run:
+  # $ nix search wget
   environment.systemPackages = with pkgs; [
-     vim
+     irssi
+     texmaker
+     texlive.combined.scheme-full
+     nixpkgs-review
+     stellarium
+     hwinfo
+     read-edid
+     smbclient
+     cifs-utils
+     xorg.xhost
+     gnumake
+     wol
+     signal-desktop
+     gnome.gnome-tweaks
+     htop
+     adobeReader
+     bfg-repo-cleaner
+     firefox
+     xsel
+     ecryptfs
+     ecryptfs-helper
+     keyutils
+     v4l_utils
+     uvcdynctrl
+     guvcview
+     kvm
+     nfs-utils
+     rpcbind
      vimPlugins.pathogen 
+     vimPlugins.vim-markdown
+     vimPlugins.editorconfig-vim
      ethtool
+     nmap
+     tcpdump
      nox
      pciutils
      terminator
@@ -47,6 +152,7 @@
      openssh
      dmidecode
      chromium
+     google-chrome
      thunderbird
      firefox
      #networkmanagerapplet
@@ -61,17 +167,16 @@
      which
      avahi
      acpitool
-     phonon
+     libsForQt5.phonon
      gitAndTools.gitFull
      wget
      evince
-     libreoffice
+     libreoffice-fresh
      mplayer
      binutils
      cpufrequtils
      pidgin
      geeqie
-     gimp
      dia
      xfce.xfwm4
      telnet
@@ -90,127 +195,103 @@
      unetbootin
      unrar
      xournal
+     gnome3.cheese
+     at
+     hplip
+     openconnect
+     networkmanager_openconnect
+     parted
+     libGL_driver
+     mesa
+     pavucontrol
+     ofono-phonesim
+     glib_networking
+     (
+       (vim_configurable.override { python = python3; }).customize{
+         name = "vi";
+         vimrcConfig.packages.myplugins = with pkgs.vimPlugins; {
+           start = [ vim-nix vim-markdown pathogen editorconfig-vim ];
+           opt = [];
+         };
+         vimrcConfig.customRC = ''
+           syntax enable
+           set mouse=
+           set ttymouse=
+           set backspace=indent,eol,start
+         '';
+       }
+     )
+
+    #nur.repos.shamilton.vokoscreen-ng
+    obs-studio
   ];
 
-  # Sound config for B&O audio
-  hardware.pulseaudio.enable = true;
-  hardware.pulseaudio.package = pkgs.pulseaudioFull;
-  hardware.pulseaudio.extraConfig = ''
-    load-module module-equalizer-sink
-    load-module module-dbus-protocol
-  '';
-  #sound.extraConfig = ''
-  #   options snd-hda-intel model=auto position_fix=0
-  #'';
- 
-  # Set common environment variables
-  environment.variables.EDITOR = "vim";
- 
-  # Enable browsers plugins
+  # Unsecure packages
+  nixpkgs.config.permittedInsecurePackages = [
+         "adobe-reader-9.5.5-1"
+       ];
+
+
+  # Environment variables
+  environment.variables.EDITOR = "vi";
+
+  # nixpkgs config
   nixpkgs.config = {
-
     allowUnfree = true;
+ 
+    # NUR
+    packageOverrides = pkgs: {
+      nur = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {
+        inherit pkgs;
+      };
+    };
+  };
 
-########################################################   
-## This part should install browsers flash plugin
-## But as the flashplugin is often outdated, and source no more available, 
-## it may break the nixos-rebuild on updates. Solution is to use the unstable channel.
-## So, I prefer doing this outside the configuration.nix by using the system wide root profile:
-##     [root@bart:~]# nix-channel --add https://nixos.org/channels/nixos-unstable unstable
-##     [root@bart:~]# echo "{ chromium = { enablePepperFlash = true; }; }" > ~/.nixpkgs/config.nix
-##     [root@bart:~]# nix-env -i -A unstable.chromium
-########################################################   
-##
-#    firefox = {
-#     enableGoogleTalkPlugin = true;
-#     enableAdobeFlash = true;
-#     jre = true;
-#    };
+  # Some programs need SUID wrappers, can be configured further or are
+  # started in user sessions.
+  # programs.mtr.enable = true;
+  programs.gnupg.agent = {
+     enable = true;
+     enableSSHSupport = true;
+  };
 
-#    chromium = {
-#     enablePepperFlash = true; # Chromium removed support for Mozilla (NPAPI) plugins so Adobe Flash no longer works
-#     enablePepperPDF = true;
-#     jre = true;
-#    };
-# 
-## Attempt to solve the outdated flash plugin file download failure:
-#    packageOverrides = pkgs: rec {
-#       flashplayer-ppapi = pkgs.stdenv.lib.overrideDerivation pkgs.flashplayer-ppapi (oldAttrs: {
-#          name = "flashplayer-ppapi";
-#          src = pkgs.fetchurl {
-#            url = "https://fpdownload.adobe.com/pub/flashplayer/pdc/27.0.0.130/flash_player_ppapi_linux.x86_64.tar.gz";
-#            sha256 = "1bl4y665a4rq4pw67pl3hyd4234p9j8lgv2853jh2pk5gbmdz6xw";
-#          };
-#       });
-#    };
-#
-# #####################################################   
-};
-
-
-  # Enable docker virtualization
-  virtualisation.docker.enable = true;
+  # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
+  services.openssh.enable = true;
 
-  # Enable CUPS to print documents.
-    services.printing.enable = true;
+  # Open ports in the firewall.
+  networking.firewall.allowedTCPPorts = [ 139 445 ];
+  networking.firewall.allowedUDPPorts = [ 137 138 ];
+  # Or disable the firewall altogether.
+  # networking.firewall.enable = false;
 
-  # For network printing
-    services.avahi.enable = true;
-    services.printing.browsing = true;
-    services.printing.browsedConf = ''
-      BrowseRemoteProtocols cups
-      BrowsePoll print.imag.fr:631
-    '';
+  # Network manager
+  networking.networkmanager.enable = true;
+  networking.networkmanager.unmanaged = [ "inreface-name:ve-*" ];
+  networking.networkmanager.dhcp = "dhclient";
+  
 
-  # Enable the X11 windowing system.
-    services.xserver.enable = true;
-    #services.xserver.videoDrivers = [ "modesetting" "intel" ];
-    services.xfs.enable = true;
-    fonts.enableFontDir = true;
-    services.xserver.layout = "fr";
-    #services.xserver.xkbVariant = "latin9";
-    #services.xserver.xkbOptions = "eurosign:e";
-    services.xserver.synaptics.enable = true;
-    services.xserver.synaptics.twoFingerScroll = true;
-    services.xserver.exportConfiguration = true;
-    services.xserver.displayManager.sessionCommands = ''
-      # Start network manager applet
-      #${pkgs.networkmanagerapplet}/bin/nm-applet &
-      # Make the Meta key act into KDE like into Gnome
-      ksuperkey -e "Super_L=Control_L|F8" 
-      '';
+  # NFS client
+  services.rpcbind.enable = true;
 
-
-  # Enable the KDE Desktop Environment.
-   services.xserver.displayManager.sddm.enable = true;
-   services.xserver.desktopManager.plasma5.enable = true;
-  #  services.xserver.displayManager.gdm.enable = true;
-  # services.xserver.desktopManager.gnome3.enable = true;
-
-  # Enable network manager
-    networking.networkmanager.enable = true;
-
-  # Enable parallel build
-  nix.maxJobs = 8 ;
-
-  # Virtualbox
-  virtualisation.virtualbox.host.enable = true;
-
-  # 
+  # Build options
+  nix.maxJobs = 8;
   nix.useSandbox = true;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  # users.extraUsers.guest = {
-  #   isNormalUser = true;
-  #   uid = 1000;
-  # };
+  # Virtualbox
+  virtualisation.virtualbox.host.enable = false;
+  
+  # Docker
+  virtualisation.docker.enable = true;
 
-  # The NixOS release to be compatible with for stateful data such as databases.
-  system.stateVersion = "17.03";
-
-  services.locate.enable = true;
+  # This value determines the NixOS release from which the default
+  # settings for stateful data, like file locations and database versions
+  # on your system were taken. It‘s perfectly fine and recommended to leave
+  # this value at the release version of the first install of this system.
+  # Before changing this value read the documentation for this option
+  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
+  system.stateVersion = "21.05"; # Did you read the comment?
 
 }
+
