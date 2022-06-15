@@ -19,7 +19,7 @@ mkShell rec {
     opencv4 
   ] ++ [ lsb-release ];
   shellHook = ''
-    export LD_LIBRARY_PATH=${libPath}:${xlibPath}:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH=${libPath}:${xlibPath}:${pkgs.cudatoolkit_11}/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
     alias pip="PIP_PREFIX='$(pwd)/_build/pip_packages' TMPDIR='$HOME' \pip"
     export PYTHONPATH="$(pwd)/_build/pip_packages/lib/python3.9/site-packages:$PYTHONPATH"
     export PATH="$(pwd)/_build/pip_packages/bin:$PATH"
