@@ -14,17 +14,24 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # Thermald necessary to fix Dell Latitude and it's Intel core i7 running at 400Mhz on heavy load
+  #services.thermald.enable = true;
+  services.throttled.enable = true;
+
+  # Always use latest kernel
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
   # Enable ntfs
   boot.supportedFilesystems = [ "ntfs" ];
 
   security.pam.enableEcryptfs = true;
 
   networking.hostName = "bart"; # Define your hostname.
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   networking.extraHosts =
     ''
       176.168.121.32 maison home
+      #129.88.1.140 ciment.ujf-grenoble.fr ciment.imag.fr ciment
     '';
 
   # Set your time zone.
@@ -34,7 +41,11 @@
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
   networking.useDHCP = false;
-  networking.interfaces.wlp0s20f3.useDHCP = true;
+
+  # Network manager
+  networking.networkmanager.enable = true;
+  networking.networkmanager.unmanaged = [ "inreface-name:ve-*" ];
+  #networking.networkmanager.dhcp = "dhcpcd";
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -72,20 +83,20 @@
   # For browsing
   services.avahi.nssmdns = true;
   services.avahi.domainName = "arcadia";
-  services.avahi.extraServiceFiles = 
-    {
-    smb = ''
-      <?xml version="1.0" standalone='no'?><!--*-nxml-*-->
-      <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
-      <service-group>
-        <name replace-wildcards="yes">%h</name>
-        <service>
-          <type>_smb._tcp</type>
-          <port>445</port>
-        </service>
-      </service-group>
-    '';
-    };
+#  services.avahi.extraServiceFiles = 
+#    {
+#    smb = ''
+#      <?xml version="1.0" standalone='no'?><!--*-nxml-*-->
+#      <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+#      <service-group>
+#        <name replace-wildcards="yes">%h</name>
+#        <service>
+#          <type>_smb._tcp</type>
+#          <port>445</port>
+#        </service>
+#      </service-group>
+#    '';
+#    };
   services.samba.enable = true;
   services.samba.enableNmbd = true;
   
@@ -110,14 +121,17 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+     s-tui
+     kdenlive
      irssi
      texmaker
      texlive.combined.scheme-full
      nixpkgs-review
+     nixpkgs-fmt
      stellarium
      hwinfo
      read-edid
-     smbclient
+     samba
      cifs-utils
      xorg.xhost
      gnumake
@@ -125,7 +139,7 @@
      signal-desktop
      gnome.gnome-tweaks
      htop
-     adobeReader
+     #adobeReader
      bfg-repo-cleaner
      firefox
      xsel
@@ -135,7 +149,7 @@
      v4l_utils
      uvcdynctrl
      guvcview
-     kvm
+     qemu_kvm
      nfs-utils
      rpcbind
      vimPlugins.pathogen 
@@ -179,10 +193,11 @@
      geeqie
      dia
      xfce.xfwm4
-     telnet
+     inetutils
      gimp-with-plugins
      hunspellDicts.fr-any
-     tightvnc
+     #tightvnc
+     turbovnc
      inkscape
      unzip
      subversion
@@ -199,28 +214,29 @@
      at
      hplip
      openconnect
-     networkmanager_openconnect
+     networkmanager-openconnect
      parted
-     libGL_driver
+     mesa.drivers
      mesa
      pavucontrol
      ofono-phonesim
-     glib_networking
-     (
-       (vim_configurable.override { python = python3; }).customize{
-         name = "vi";
-         vimrcConfig.packages.myplugins = with pkgs.vimPlugins; {
-           start = [ vim-nix vim-markdown pathogen editorconfig-vim ];
-           opt = [];
-         };
-         vimrcConfig.customRC = ''
-           syntax enable
-           set mouse=
-           set ttymouse=
-           set backspace=indent,eol,start
-         '';
-       }
-     )
+     glib-networking
+     vim
+    # (
+    #   (vim_configurable.override { python = python3; }).customize{
+    #     name = "vi";
+    #     vimrcConfig.packages.myplugins = with pkgs.vimPlugins; {
+    #       start = [ vim-nix vim-markdown pathogen editorconfig-vim ];
+    #       opt = [];
+    #     };
+    #     vimrcConfig.customRC = ''
+    #      syntax enable
+    #       set mouse=
+    #       set ttymouse=
+    #       set backspace=indent,eol,start
+    #     '';
+    #   }
+    # )
 
     #nur.repos.shamilton.vokoscreen-ng
     obs-studio
@@ -266,18 +282,27 @@
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
 
-  # Network manager
-  networking.networkmanager.enable = true;
-  networking.networkmanager.unmanaged = [ "inreface-name:ve-*" ];
-  networking.networkmanager.dhcp = "dhclient";
-  
-
   # NFS client
   services.rpcbind.enable = true;
+
+  # DNS forwarder
+  #services.bind.enable = true;
 
   # Build options
   nix.maxJobs = 8;
   nix.useSandbox = true;
+  nix.settings = {
+     trusted-substituters = [ "http://nix-binary-cache.u-ga.fr/nix.cache" "http://ciment-grid.univ-grenoble-alpes.fr/nix.cache" "https://cache.nixos.org/" "https://gricad.cachix.org" ];
+     require-sigs = false;
+     tarball-ttl = 0;
+     substituters = [ "http://nix-binary-cache.u-ga.fr/nix.cache" "https://cache.nixos.org" "https://cache.nixos.org/"  "https://gricad.cachix.org" ];
+  };
+
+  # Extra options
+  nix.extraOptions = ''
+    trusted-users = root bzizou
+    experimental-features = nix-command flakes
+  ''; 
 
   # Virtualbox
   virtualisation.virtualbox.host.enable = false;
