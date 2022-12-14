@@ -12,7 +12,6 @@ let
   pkgs = (import pinnedPkgs) {
   config = rec {
     allowUnfree = true;
-    cudaSupport = true;
     };
   };
 
