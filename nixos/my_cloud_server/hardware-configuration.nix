@@ -10,8 +10,8 @@
 
   boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "usb_storage" "usbhid" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-intel" ];
-  boot.kernelParams = [ "nomodeset" ];
+  boot.kernelModules = [ "fbcon" "kvm-intel" ];
+  #boot.kernelParams = [ "nomodeset" "i915.force_probe=9ba8" ];
   boot.extraModulePackages = [ ];
   boot.supportedFilesystems = [ "zfs" ];
   boot.zfs.devNodes = "/dev/disk/by-partuuid";

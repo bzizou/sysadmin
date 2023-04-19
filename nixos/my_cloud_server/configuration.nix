@@ -16,13 +16,17 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+#  boot.kernelPackages = pkgs.linuxPackages_5_15;
+#  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
+
   networking.hostId = "42c134a0";
   networking.hostName = "albator"; # Define your hostname.
   networking.domain = "bzizou.net";
   networking.wireless.enable = false;  # Enables wireless support via wpa_supplicant.
   networking.wireless.interfaces = ["wlp1s0"];
   networking.networkmanager.unmanaged = ["w1p1s0"]; # disable wifi interface into networkmanager as it is managed by wpa_supplicant
-  networking.wireless.networks.Bbox-37BFA846.pskRaw="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+  networking.wireless.networks.Bbox-37BFA846.pskRaw="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
   # Set your time zone.
   time.timeZone = "Europe/Paris";
@@ -41,18 +45,44 @@
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
   console = {
-    font = "Lat2-Terminus32";
+    #font = "Lat2-Terminus32";
     keyMap = "fr";
   };
 
-  # Enable the X11 windowing system.
-  services.xserver.enable = true;
+  # Cron 
+  services.cron.enable = true;
 
-  # Enable the GNOME Desktop Environment.
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
-  
+  # Xwindow system
+  services.xserver = {
+      enable = true;
+      desktopManager.gnome.enable = true;
+      videoDrivers = [ "modesetting" ];
+      displayManager = {
+          gdm.enable = true;
+          defaultSession = "gnome";
+          autoLogin = {
+              enable = true;
+              user = "mame";
+          };
+      };
+  };
 
+  # For Intel UHD 610 Video driver
+  #######################################
+  #nixpkgs.config.packageOverrides = pkgs: {
+  #  vaapiIntel = pkgs.vaapiIntel.override { enableHybridCodec = true; };
+  #};
+  hardware.opengl = {
+    enable = true;
+    extraPackages = with pkgs; [
+      #intel-media-driver # LIBVA_DRIVER_NAME=iHD
+      vaapiIntel         # LIBVA_DRIVER_NAME=i965 (older but works better for Firefox/Chromium)
+      #vaapiVdpau
+      #libvdpau-va-gl
+    ];
+  };
+  ######################################
+ 
   # Configure keymap in X11
   services.xserver.layout = "fr";
   # services.xserver.xkbOptions = "eurosign:e";
@@ -70,14 +100,36 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.bzizou = {
      isNormalUser = true;
-     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+     extraGroups = [ "wheel" "video" ];
   };
+  users.users.mame = {
+     isNormalUser = true;
+     extraGroups = [ "video" ];
+  };
+  users.users.gdm = {
+     extraGroups = [ "video" ];
+  };
+
+  # Extra options
+  nix.extraOptions = ''
+    trusted-users = root bzizou
+    experimental-features = nix-command flakes
+  '';
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+     glxinfo
+     dmidecode
+     superTuxKart
+     p7zip
+     chrome-gnome-shell
+     gnome.gnome-tweaks
+     chromium
+     mame
      mailutils
-     telnet
+     pciutils
+     inetutils
      vim
      wget
      firefox
@@ -94,11 +146,12 @@
      git
      tcpdump
      fail2ban
+     goaccess
   ];
 
   services.minidlna = {
     enable = true;
-    mediaDirs =
+    settings.media_dir =
     [
       "P,/arcadia/Multimedia/Images"
       "V,/arcadia/Multimedia/Images"
@@ -112,6 +165,10 @@
     enable = true;
     openFirewall = true;
   };
+
+  services.squid.enable = true;
+  services.squid.extraConfig =
+    "url_rewrite_program /nix/store/vlyrb66bz612pswrb96g5zzazag75gh7-squidguard-1.6.0/bin/squidGuard -c /home/squidguard/squidguard.conf";
 
   #nixpkgs.config.allowUnfree = true;
 
@@ -132,7 +189,7 @@
   services.fail2ban.enable = true;
 
   # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [ 2869 8200 80 443 139 445 ];
+  networking.firewall.allowedTCPPorts = [ 2869 8200 80 443 139 445 3128 ];
   networking.firewall.allowedUDPPorts = [ 5001 1900 137 138 ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
@@ -140,7 +197,7 @@
   # Letsencrypt
   security.acme = {
     acceptTerms = true;
-    email = "bruno@bzizou.net";
+    defaults.email = "bruno@bzizou.net";
   };
 
   # Mail config
