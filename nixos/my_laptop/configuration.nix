@@ -8,6 +8,7 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      ./vim.nix
     ];
 
   # Use the systemd-boot EFI boot loader.
@@ -19,7 +20,7 @@
   services.throttled.enable = true;
 
   # Always use latest kernel
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages_5_15;
 
   # Enable ntfs
   boot.supportedFilesystems = [ "ntfs" ];
@@ -32,6 +33,7 @@
     ''
       176.168.121.32 maison home
       #129.88.1.140 ciment.ujf-grenoble.fr ciment.imag.fr ciment
+      192.168.1.220 buzz bmso
     '';
 
   # Set your time zone.
@@ -121,6 +123,28 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+     kstars
+     indi-full
+     ffmpeg
+     zoom-us
+     esptool
+     arduino
+     mkspiffs-presets.arduino-esp32
+     arduino-mk
+     hardinfo
+     keepass
+     handlr
+     slack
+     xorg.libxcb
+     libGL
+     appimage-run
+     cura
+     blender
+     hugo
+     p7zip
+     mame
+     nextcloud-client
+     siril
      s-tui
      kdenlive
      irssi
@@ -221,25 +245,8 @@
      pavucontrol
      ofono-phonesim
      glib-networking
-     vim
-    # (
-    #   (vim_configurable.override { python = python3; }).customize{
-    #     name = "vi";
-    #     vimrcConfig.packages.myplugins = with pkgs.vimPlugins; {
-    #       start = [ vim-nix vim-markdown pathogen editorconfig-vim ];
-    #       opt = [];
-    #     };
-    #     vimrcConfig.customRC = ''
-    #      syntax enable
-    #       set mouse=
-    #       set ttymouse=
-    #       set backspace=indent,eol,start
-    #     '';
-    #   }
-    # )
-
-    #nur.repos.shamilton.vokoscreen-ng
-    obs-studio
+     #nur.repos.shamilton.vokoscreen-ng
+     obs-studio
   ];
 
   # Unsecure packages
@@ -249,7 +256,15 @@
 
 
   # Environment variables
-  environment.variables.EDITOR = "vi";
+  environment.variables.EDITOR = "vim";
+
+  # Default aliases
+  programs.bash.shellAliases = {
+    l = "ls -alh";
+    ll = "ls -l";
+    ls = "ls --color=tty";
+    vi = "vim";
+  };
 
   # nixpkgs config
   nixpkgs.config = {
