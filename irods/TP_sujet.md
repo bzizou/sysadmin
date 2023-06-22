@@ -158,7 +158,7 @@ pep_api_data_obj_get_pre(*INSTANCE_NAME, *COMM, *DATAOBJINP, *BUFFER, *PORTAL_OP
 ```
 
 Maintenant, faites un `iget` d'un fichier que vous avez déposé sur une autre ressource avant. Et faites un `ils -l`. Vous constaterez qu'un nouveau réplicat local a été créé!
-Mais si vous refaites maintenant un `iget`, vous avez une erreur car un réplica existe déja. Il faut alors rajouter un test pour ne répliquer que lorsque cela est nécessaire. Saurez-vous écrire ce test? PErso, j'ai pas encore trouvé, haha! MAis suivez ce thread, la réponse y sera sûrement prochainement: https://groups.google.com/g/iROD-Chat/c/HSkxZDYLD2I
+Mais si vous refaites maintenant un `iget`, vous avez une erreur car un réplica existe déja. Il faut alors rajouter un test pour ne répliquer que lorsque cela est nécessaire. Saurez-vous écrire ce test? Perso, je n'ai pas encore trouvé, haha! Mais suivez ce thread, la réponse y sera sûrement prochainement: https://groups.google.com/g/iROD-Chat/c/HSkxZDYLD2I
 
 ### Mise en place du moteur de règles python sur un exemple mettant en jeu les meta-données
 
