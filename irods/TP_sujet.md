@@ -237,3 +237,6 @@ Vous devez voir les informations "EXIF" de l'image importée sous la forme de me
 Er... shit... : https://github.com/irods/irods_rule_engine_plugin_python/issues/156
 
 Ce TP marchera un jour ;-)
+
+# Pour aller plus loin
+Vous pouvez jetter un oeil à ce cas d'usage, qui comporte du code opérationnel: https://jcad2022.sciencesconf.org/data/027_Presentation_courte_Bruno_Bzeznik_iRods_pour_le_projet_Orchamp.PDF
