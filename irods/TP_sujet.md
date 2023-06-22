@@ -73,11 +73,11 @@ Note: les commandes d'admin (user 'rods', configuré sous le compte 'irods') peu
 ```bash
 su - irods
 #  Création de ressource "passthru" permettant de régler des poids lecture/ecriture
-iadmin mkresc ust4hpc-data0-pt passthru '' 'write=1.0;read=1.0'
+iadmin mkresc ust4hpc-data<num>-pt passthru '' 'write=1.0;read=1.0'
 # Affiliation de la ressource de stockage à la ressource passthru
-iadmin addchildtoresc ust4hpc-data0-pt ust4hpc-data0
+iadmin addchildtoresc ust4hpc-data<num>-pt ust4hpc-data0
 # Affiliation de la ressource passthru à la ressource composée "aussois"
-iadmin addchildtoresc aussois ust4hpc-data0-pt
+iadmin addchildtoresc aussois ust4hpc-data<num>-pt
 ```
 
 Vérifiez:
