@@ -160,6 +160,22 @@ pep_api_data_obj_get_pre(*INSTANCE_NAME, *COMM, *DATAOBJINP, *BUFFER, *PORTAL_OP
 Maintenant, faites un `iget` d'un fichier que vous avez déposé sur une autre ressource avant. Et faites un `ils -l`. Vous constaterez qu'un nouveau réplicat local a été créé!
 Mais si vous refaites maintenant un `iget`, vous avez une erreur car un réplica existe déja. Il faut alors rajouter un test pour ne répliquer que lorsque cela est nécessaire. Saurez-vous écrire ce test? Perso, je n'ai pas encore trouvé, haha! Mais suivez ce thread, la réponse y sera sûrement prochainement: https://groups.google.com/g/iROD-Chat/c/HSkxZDYLD2I
 
+EDIT: La règle complète, suite à la discussion ci-dessus sur le chat irods:
+
+```
+pep_api_data_obj_get_pre(*INSTANCE_NAME, *COMM, *DATAOBJINP, *BUFFER, *PORTAL_OPR_OUT) {
+  msiSplitPath(*DATAOBJINP.obj_path, *target_collection, *target_data_object); # see https://docs.irods.org/4.3.0/doxygen/msiHelper_8cpp.html#a5de988327f1dfe917bcc0bfbac1087ec
+  *target_resource_root = 'ust4hpc-data1-pt';
+  *query = SELECT count(DATA_ID) where COLL_NAME = '*target_collection' and DATA_NAME = '*target_data_object' and DATA_REPL_STATUS = '1' and DATA_RESC_HIER like '*target_resource_root;%'
+  foreach (*result in *query){
+    *good_replica_count_on_resource = int(*result.DATA_ID);
+    if (*good_replica_count_on_resource == 0) {
+        msiDataObjRepl(*DATAOBJINP.obj_path,"*target_resource_root",*status);
+    }
+  }
+}
+```
+
 ### Mise en place du moteur de règles python sur un exemple mettant en jeu les meta-données
 
 Nous allons mettre en place le moteur de règles python et générer l'extraction des "EXIF" à chaque fois qu'une image est uploadée.
