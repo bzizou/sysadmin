@@ -626,6 +626,10 @@ acPostProcForDataCopyReceived(*leaf_resource) {}
 # pep_resource_resolve_hierarchy_pre(*INSTANCE, *CONTEXT, *OUT, *OPERATION, *HOST, *PARSER, *VOTE){*OUT="compound_resource_cache_refresh_policy=when_necessary";}  # default
 # pep_resource_resolve_hierarchy_pre(*INSTANCE, *CONTEXT, *OUT, *OPERATION, *HOST, *PARSER, *VOTE){*OUT="compound_resource_cache_refresh_policy=always";}
 #
+#
+# AUTOMATIC stageing: the current resource is named ust4hpc-data1-pt
+# and we want to replicate each file that is not already replicated
+# on it before any get operation.
 pep_api_data_obj_get_pre(*INSTANCE_NAME, *COMM, *DATAOBJINP, *BUFFER, *PORTAL_OPR_OUT) {
   msiSplitPath(*DATAOBJINP.obj_path, *target_collection, *target_data_object); # see https://docs.irods.org/4.3.0/doxygen/msiHelper_8cpp.html#a5de988327f1dfe917bcc0bfbac1087ec
   *target_resource_root = 'ust4hpc-data1-pt';
