@@ -38,6 +38,7 @@ Voir https://docs.irods.org/4.3.0/getting_started/installation/
 
 Nous allons tout d'abord configurer ensemble le noeud meta-catalogue. Notez bien les étapes, car pour configurer vos ressources, ce sera très similaire.
 
+NOTE: Avec les versions récentes de Postgres, il peut être nécessaire de faire `ALTER DATABASE "ICAT" OWNER TO irods;`
 
 ## Sur les noeuds de data
 

@@ -22,6 +22,8 @@
   # Always use latest kernel
   boot.kernelPackages = pkgs.linuxPackages_5_15;
 
+  systemd.enableUnifiedCgroupHierarchy = false;
+
   # Enable ntfs
   boot.supportedFilesystems = [ "ntfs" ];
 
@@ -33,7 +35,7 @@
     ''
       176.168.121.32 maison home
       #129.88.1.140 ciment.ujf-grenoble.fr ciment.imag.fr ciment
-      192.168.1.220 buzz bmso
+      192.168.1.220 buzzz bmso
     '';
 
   # Set your time zone.
@@ -74,7 +76,7 @@
   
   # Configure keymap in X11
   services.xserver.layout = "fr";
-  services.xserver.xkbOptions = "eurosign:e";
+  #services.xserver.xkbOptions = "eurosign:e";
 
   # Enable CUPS to print documents.
   services.printing.enable = true;
@@ -101,13 +103,38 @@
 #    };
   services.samba.enable = true;
   services.samba.enableNmbd = true;
-  
+
+  services.home-assistant = {
+    enable = false;
+    extraComponents = [
+      # Components required to complete the onboarding
+      "esphome"
+      "met"
+      "radio_browser"
+      "soundtouch"
+    ];
+    config = {
+      # Includes dependencies for a basic setup
+      # https://www.home-assistant.io/integrations/default_config/
+      default_config = {};
+    };
+  };
+
   # Enable sound.
   sound.enable = true;
   hardware.pulseaudio.enable = true;
 
   # Enable touchpad support (enabled default in most desktopManager).
   services.xserver.libinput.enable = true;
+
+  # enable antivirus clamav and
+  # keep the signatures' database updated
+  services.clamav.daemon.enable = true;
+  services.clamav.updater.enable = true;
+  services.clamav.daemon.settings = {
+    LogFile = "/var/log/clamav.log";
+  };
+
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   # users.users.jane = {
@@ -251,7 +278,8 @@
 
   # Unsecure packages
   nixpkgs.config.permittedInsecurePackages = [
-         "adobe-reader-9.5.5-1"
+    "adobe-reader-9.5.5-1"
+    "python-2.7.18.6" 
        ];
 
 
@@ -304,8 +332,8 @@
   #services.bind.enable = true;
 
   # Build options
-  nix.maxJobs = 8;
-  nix.useSandbox = true;
+  nix.settings.max-jobs = 8;
+  nix.settings.sandbox = true;
   nix.settings = {
      trusted-substituters = [ "http://nix-binary-cache.u-ga.fr/nix.cache" "http://ciment-grid.univ-grenoble-alpes.fr/nix.cache" "https://cache.nixos.org/" "https://gricad.cachix.org" ];
      require-sigs = false;
