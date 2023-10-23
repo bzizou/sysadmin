@@ -4,8 +4,8 @@ let
   pinnedPkgs = hostPkgs.fetchFromGitHub {
     owner = "NixOS";
     repo = "nixpkgs";
-    rev = "21.05";
-    sha256 = "1ckzhh24mgz6jd1xhfgx0i9mijk6xjqxwsshnvq789xsavrmsc36";
+    rev = "23.05";
+    sha256 = "sha256-btHN1czJ6rzteeCuE/PNrdssqYD2nIA4w48miQAFloM";
   };
 in
 let
@@ -28,8 +28,18 @@ in mkShell rec {
     pip
     setuptools
     scipy
+    numpy
     matplotlib
     h5py
+    (buildPythonPackage rec {
+      name = "mat73";
+      version = "0.62";
+      propagatedBuildInputs = with self; [ numpy h5py scipy ];
+      src = pkgs.fetchurl{
+        url = "mirror://pypi/m/mat73/mat73-${version}.tar.gz";
+        sha256 = "sha256-uO6g08ULzX1RwMzVGnNlDDpbjQWZB0+5nefKoxOFXiw=";
+      };
+    })
   ] ++ [ lsb-release ];
   shellHook = ''
     export LD_LIBRARY_PATH=${libPath}:$LD_LIBRARY_PATH
