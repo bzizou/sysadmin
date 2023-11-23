@@ -14,6 +14,7 @@
             vim-trailing-whitespace
             pathogen 
             editorconfig-vim
+            nvim-yarp
             ncm2
             ncm2-ultisnips
             ncm2-bufword
@@ -33,7 +34,9 @@
             inherit (rustc.src) name;
             phases = ["unpackPhase" "installPhase"];
             installPhase = ''cp -r library $out'';
-          }}'
+              }}'
+          autocmd BufEnter * call ncm2#enable_for_buffer()
+          set completeopt=noinsert,menuone,noselect
         '';
       };
     }
