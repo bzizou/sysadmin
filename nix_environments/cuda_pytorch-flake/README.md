@@ -4,5 +4,5 @@ Usage:
 
 ```
 export NIXPKGS_ALLOW_UNFREE=1
-nix develop .#sshell --impure
+nix develop --impure
 ```

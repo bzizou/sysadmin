@@ -21,7 +21,7 @@
       formatter.${system} = pkgs.nixpkgs-fmt;
 
       devShells.${system} = rec {
-        sshell = pkgs.mkShell {
+        default = pkgs.mkShell {
           xlibPath = with pkgs.xorg; pkgs.lib.makeLibraryPath [ libX11 libXdmcp libXau libXext libxcb ];
           libPath = with pkgs ; pkgs.lib.makeLibraryPath [ 
                           stdenv.cc.cc cudaPackages_11.cudatoolkit
@@ -41,7 +41,7 @@
           ]))
          ] ++ [pkgs.lsb-release];
          shellHook= ''
-           export LD_LIBRARY_PATH=${sshell.libPath}:${sshell.xlibPath}:${pkgs.cudaPackages_11.cudatoolkit}/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+           export LD_LIBRARY_PATH=${default.libPath}:${default.xlibPath}:${pkgs.cudaPackages_11.cudatoolkit}/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
          '';  
         };
       };
