@@ -2,5 +2,7 @@ Contribution of SOFYA DYMCHENKO <sofya.dymchenko@univ-grenoble-alpes.fr> which m
 
 Usage:
 
+```
 export NIXPKGS_ALLOW_UNFREE=1
-`nix develop .#sshell --impure`
+nix develop .#sshell --impure
+```
