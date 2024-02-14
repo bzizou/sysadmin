@@ -1,0 +1,13 @@
+diff --git a/torch/nn/modules/upsampling.py b/torch/nn/modules/upsampling.py
+index 4f13c84c2e..0503fb7f1f 100644
+--- a/torch/nn/modules/upsampling.py
++++ b/torch/nn/modules/upsampling.py
+@@ -154,7 +154,7 @@ class Upsample(Module):
+ 
+     def forward(self, input: Tensor) -> Tensor:
+         return F.interpolate(input, self.size, self.scale_factor, self.mode, self.align_corners,
+-                             recompute_scale_factor=self.recompute_scale_factor)
++                             )#recompute_scale_factor=self.recompute_scale_factor)
+ 
+     def extra_repr(self) -> str:
+         if self.scale_factor is not None:
