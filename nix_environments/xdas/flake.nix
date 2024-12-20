@@ -1,3 +1,10 @@
+# A flake for python that can be called either as a dev shell:
+#   nix develop
+# or that can be ran as a python interpreter:
+#   nix run
+# Customize your python packages in the lines with the "#### HERE" comment
+# Also customize your pinned nixpkgs version in the inputs
+
 {
   description = "Flake: Python 3.12.17";
 
@@ -13,29 +20,40 @@
       pkgs = import nixpkgs {
         inherit system;
         allowUnfree = true;
-    };
-    in
-    {
-      formatter.${system} = pkgs.nixpkgs-fmt;
-
-      devShells.${system} = rec {
-        default = pkgs.mkShell {
-          xlibPath = with pkgs.xorg; pkgs.lib.makeLibraryPath [ libX11 libXdmcp libXau libXext libxcb ];
+      };
+      shell = pkgs.mkShell rec {
           libPath = with pkgs ; pkgs.lib.makeLibraryPath [ 
                           stdenv.cc.cc
                           openssl zlib 
                         ];
-          buildInputs = [
-           ( pkgs.python3.withPackages(ps: with ps; [
-                numpy
-                xdas
-                torch
-          ]))
-         ] ++ [pkgs.lsb-release];
-         shellHook= ''
-             export LD_LIBRARY_PATH=${default.libPath}:$LD_LIBRARY_PATH
-         '';  
-        };
+          mypy = pkgs.python3.withPackages(ps: with ps; [
+
+#### HERE goes the Python packages list #### 
+                 numpy
+                 xdas
+                 torch
+############################################
+
+          ]);
+          buildInputs = [ ( mypy ) ] ++ [pkgs.lsb-release];
+          shellHook= ''
+             export LD_LIBRARY_PATH=${shell.libPath}:$LD_LIBRARY_PATH
+          '';  
+      };
+      runner = pkgs.writeShellApplication {
+        name = "my-python";
+        runtimeInputs = shell.buildInputs;
+        text = ''
+          ${shell.mypy.interpreter}
+        '';
+      };
+    in
+    {
+      formatter.${system} = pkgs.nixpkgs-fmt;
+      devShells.${system}.default = shell; 
+      apps.${system}.default = {
+        type = "app";
+        program = "${runner}/bin/my-python";
       };
     };
 }
