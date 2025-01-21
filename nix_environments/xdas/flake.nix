@@ -53,6 +53,7 @@
       devShells.${system}.default = shell; 
       apps.${system}.default = {
         type = "app";
+        pname = "my-python";
         program = "${runner}/bin/my-python";
       };
     };
