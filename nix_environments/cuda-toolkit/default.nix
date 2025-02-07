@@ -3,7 +3,7 @@
 # as nixpkgs gcc is too recent to work with nvcc (here, we are using
 # gcc11 in place of the default gcc12 of stdenv)
 
-let nixpkgs = import ./env-bigfoot-nixpkgs.nix;
+let nixpkgs = import <nixpkgs> {};
 
 in nixpkgs.mkShell.override { stdenv = nixpkgs.stdenvNoCC; } {
   buildInputs = with nixpkgs; [
