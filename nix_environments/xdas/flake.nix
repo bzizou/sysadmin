@@ -2,6 +2,9 @@
 #   nix develop
 # or that can be ran as a python interpreter:
 #   nix run
+# It can also be installed into the profile:
+#   nix profile install
+#
 # Customize your python packages in the lines with the "#### HERE" comment
 # Also customize your pinned nixpkgs version in the inputs
 
@@ -49,6 +52,7 @@
       };
     in
     {
+      packages.x86_64-linux.default = shell.mypy;
       formatter.${system} = pkgs.nixpkgs-fmt;
       devShells.${system}.default = shell; 
       apps.${system}.default = {
