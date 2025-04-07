@@ -58,6 +58,25 @@
                  igraph
                  terra
                  sp
+                 akima
+                 gdistance
+                 GA
+                 XRJulia
+                 # RFate from sources:
+                 (buildRPackage {
+                   name = "ResistanceGA";
+                   src = pkgs.fetchFromGitHub {
+                     owner = "wpeterman";
+                     repo = "ResistanceGA";
+                     rev = "9442376";
+                     sha256 = "sha256-qicOnyBTZmcxnSulSEZ0oKHMMM1zRud1FZEgYSbNK4I=";
+                   };
+                   propagatedBuildInputs = with pkgs ; [
+                     devtools raster ggplot2 ggExtra akima plyr dplyr gdistance GA 
+                     lme4 Matrix MuMIn spatstat spdep doParallel JuliaCall XRJulia
+                   ];
+                 })
+    
 ############################################
 
           ]; };
