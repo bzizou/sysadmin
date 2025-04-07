@@ -11,10 +11,10 @@
 # Also customize your pinned nixpkgs version in the inputs
 
 {
-  description = "Flake: Python 3.12.17";
+  description = "Flake: pre-commit install for OAR3 dev";
 
   inputs = {
-    nixpkgs.url = "github:bzizou/nixpkgs/a33463999d9599a0c339f9df7a7ff31c39d1b799";
+    nixpkgs.url = "github:bzizou/nixpkgs/9a333eaa80901efe01df07eade2c16d183761fa3";
   };
 
   nixConfig.bash-prompt = "\\e[35m\[nix-develop (\\h)\]\\e[34m\\w\\e[39m$ ";
