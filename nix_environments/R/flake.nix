@@ -62,7 +62,7 @@
                  gdistance
                  GA
                  XRJulia
-                 # RFate from sources:
+                 # ResistanceGA from sources:
                  (buildRPackage {
                    name = "ResistanceGA";
                    src = pkgs.fetchFromGitHub {
