@@ -11,10 +11,10 @@
 # Also customize your pinned nixpkgs version in the inputs
 
 {
-  description = "Flake: pre-commit install for OAR3 dev";
+  description = "Flake: Python 3.12.17";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nixpkgs.url = "github:bzizou/nixpkgs/a33463999d9599a0c339f9df7a7ff31c39d1b799";
   };
 
   nixConfig.bash-prompt = "\\e[35m\[nix-develop (\\h)\]\\e[34m\\w\\e[39m$ ";
@@ -45,28 +45,14 @@
                    pipInstallFlags = [ "--ignore-installed" ];
           };
 
-         myprecommit= pkgs.python3.pkgs.buildPythonPackage rec {
-                   name = "precommit";
-                   src = pkgs.fetchFromGitHub {
-                     owner = "pre-commit";
-                     repo = "pre-commit";
-                     rev = "v4.2.0";
-                     sha256 = "sha256-rUhI9NaxyRfLu/mfLwd5B0ybSnlAQV2Urx6+fef0sGM=";
-                   };
-          };
-
 #######################################################################
  
           mypy = pkgs.python3.withPackages(ps: with ps; [
 
 #### HERE goes the Python packages list #### 
-                 cfgv
-                 identify
-                 pyyaml
-                 nodeenv
-                 virtualenv
                  mypip
-                 myprecommit
+                 numpy
+                 snakemake
 ###########################################
 
           ]);
