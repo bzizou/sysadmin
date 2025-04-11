@@ -1,6 +1,6 @@
-# A flake for python that can be called either as a dev shell:
+# A flake for R that can be called either as a dev shell:
 #   nix develop
-# or that can be ran as a python interpreter:
+# or that can be ran as a R interpreter:
 #   nix run
 # It can also be installed into the profile:
 #   nix profile install
