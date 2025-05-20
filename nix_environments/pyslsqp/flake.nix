@@ -41,7 +41,9 @@
                      rev = "v0.1.3";
                      sha256 = "sha256-FuK8uPaIPKKlbhymhHUqt4NdMPAPPykV1rymbgZvXlU";
                    };
+                   # Build time dependencies:
                    nativeBuildInputs = [ pkgs.gfortran ] ++ (with pkgs.python3.pkgs; [ meson meson-python ]);
+                   # Runtime dependencies:
                    buildInputs = with pkgs.python3.pkgs; [ numpy h5py matplotlib ];
           };
 
