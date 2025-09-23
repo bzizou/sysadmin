@@ -9,6 +9,7 @@
         packages.myPlugins = with pkgs.vimPlugins; {
           start = [ 
             vim-nix
+            vim-isort
             vim-addon-nix
             vim-markdown 
             vim-trailing-whitespace
@@ -26,7 +27,7 @@
         };
         customRC = ''
           set nocompatible
-          set mouse=
+          set mouse=""
           set backspace=indent,eol,start
           set nofoldenable
           let $RUST_SRC_PATH = '${stdenv.mkDerivation {

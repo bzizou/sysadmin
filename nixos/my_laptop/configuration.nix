@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 
 {
   imports =
@@ -11,72 +11,136 @@
       ./vim.nix
     ];
 
-  # Use the systemd-boot EFI boot loader.
+  # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Thermald necessary to fix Dell Latitude and it's Intel core i7 running at 400Mhz on heavy load
-  #services.thermald.enable = true;
-  services.throttled.enable = true;
+  boot.initrd.luks.devices."luks-6d87cb82-a47a-49aa-b7d1-xxxxxxxxxxx".device = "/dev/disk/by-uuid/6d87cb82-a47a-49aa-b7d1-xxxxxxxxxx";
 
-  # Always use latest kernel
-  boot.kernelPackages = pkgs.linuxPackages_5_15;
-
-  systemd.enableUnifiedCgroupHierarchy = false;
-
-  # Enable ntfs
-  boot.supportedFilesystems = [ "ntfs" ];
-
-  security.pam.enableEcryptfs = true;
+  # Kernel version
+  boot.kernelPackages = pkgs.linuxPackages_6_12;
 
   networking.hostName = "bart"; # Define your hostname.
-
-  networking.extraHosts =
-    ''
-      176.168.121.32 maison home
-      #129.88.1.140 ciment.ujf-grenoble.fr ciment.imag.fr ciment
-      192.168.1.220 buzzz bmso
-    '';
-
-  # Set your time zone.
-  time.timeZone = "Europe/Paris";
-
-  # The global useDHCP flag is deprecated, therefore explicitly set to false here.
-  # Per-interface useDHCP will be mandatory in the future, so this generated config
-  # replicates the default behaviour.
-  networking.useDHCP = false;
-
-  # Network manager
-  networking.networkmanager.enable = true;
-  networking.networkmanager.unmanaged = [ "inreface-name:ve-*" ];
-  #networking.networkmanager.dhcp = "dhcpcd";
+  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
+  # Enable networking
+  networking.networkmanager.enable = true;
+
+  networking.extraHosts =
+    ''
+      176.168.121.32 maison home
+    '';
+
+  # Enable flakes
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+  # Auto upgrade
+  system.autoUpgrade = {
+    enable = true;
+    flake = inputs.self.outPath;
+    flags = [
+      "-L" # print build logs
+    ];
+    dates = "12:00";
+    randomizedDelaySec = "45min";
+  };
+
+  # Enable ntfs
+  boot.supportedFilesystems = [ "ntfs" ];
+
+  # Set your time zone.
+  time.timeZone = "Europe/Paris";
+
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
-  console = {
-     #font = "Lat2-Terminus32";
-     font = "Lat2-Terminus16";
-     keyMap = "fr";
+
+  i18n.extraLocaleSettings = {
+    LC_ADDRESS = "fr_FR.UTF-8";
+    LC_IDENTIFICATION = "fr_FR.UTF-8";
+    LC_MEASUREMENT = "fr_FR.UTF-8";
+    LC_MONETARY = "fr_FR.UTF-8";
+    LC_NAME = "fr_FR.UTF-8";
+    LC_NUMERIC = "fr_FR.UTF-8";
+    LC_PAPER = "fr_FR.UTF-8";
+    LC_TELEPHONE = "fr_FR.UTF-8";
+    LC_TIME = "fr_FR.UTF-8";
   };
+
+  fonts.packages = with pkgs; [
+   noto-fonts
+   noto-fonts-cjk-sans
+   noto-fonts-emoji
+   liberation_ttf
+   fira-code
+   fira-code-symbols
+   mplus-outline-fonts.githubRelease
+   dina-font
+   proggyfonts
+   dancing-script
+  ];
+
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
 
-  # Bluetooth
-  hardware.bluetooth.enable = true;
- 
   # Enable the GNOME Desktop Environment.
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.displayManager.gdm.wayland = false;
-  services.xserver.desktopManager.gnome.enable = true;
-  
+  services.displayManager.gdm.enable = true;
+  services.desktopManager.gnome.enable = true;
+
   # Configure keymap in X11
-  services.xserver.layout = "fr";
-  #services.xserver.xkbOptions = "eurosign:e";
+  services.xserver.xkb = {
+    layout = "fr";
+    variant = "";
+  };
+
+  # Enable OpenGL
+  hardware.graphics = {
+    enable = true;
+  };
+
+  # Load nvidia driver for Xorg and Wayland
+  services.xserver.videoDrivers = ["nvidia"];
+
+  hardware.nvidia = {
+
+    # Modesetting is required.
+    modesetting.enable = true;
+
+    # Nvidia power management. Experimental, and can cause sleep/suspend to fail.
+    # Enable this if you have graphical corruption issues or application crashes after waking
+    # up from sleep. This fixes it by saving the entire VRAM memory to /tmp/ instead 
+    # of just the bare essentials.
+    powerManagement.enable = true;
+
+    # Fine-grained power management. Turns off GPU when not in use.
+    # Experimental and only works on modern Nvidia GPUs (Turing or newer).
+    powerManagement.finegrained = false;
+
+    # Use the NVidia open source kernel module (not to be confused with the
+    # independent third-party "nouveau" open source driver).
+    # Support is limited to the Turing and later architectures. Full list of 
+    # supported GPUs is at: 
+    # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus 
+    # Only available from driver 515.43.04+
+    # Currently alpha-quality/buggy, so false is currently the recommended setting.
+    open = false;
+
+    # Enable the Nvidia settings menu,
+	# accessible via `nvidia-settings`.
+    nvidiaSettings = true;
+
+    # Optionally, you may need to select the appropriate driver version for your specific GPU.
+    package = config.boot.kernelPackages.nvidiaPackages.beta;
+  };
+
+  services.thermald.enable = true;
+
+  # Configure console keymap
+  console.keyMap = "fr";
 
   # Enable CUPS to print documents.
   services.printing.enable = true;
@@ -84,72 +148,124 @@
   services.printing.browsing = true;
   services.printing.drivers = [ pkgs.hplip ];
 
-  # For browsing
-  services.avahi.nssmdns = true;
-  services.avahi.domainName = "arcadia";
-#  services.avahi.extraServiceFiles = 
-#    {
-#    smb = ''
-#      <?xml version="1.0" standalone='no'?><!--*-nxml-*-->
-#      <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
-#      <service-group>
-#        <name replace-wildcards="yes">%h</name>
-#        <service>
-#          <type>_smb._tcp</type>
-#          <port>445</port>
-#        </service>
-#      </service-group>
-#    '';
-#    };
-  services.samba.enable = true;
-  services.samba.enableNmbd = true;
+  # Enable sound with pipewire.
+  services.pulseaudio.enable = false;
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    # If you want to use JACK applications, uncomment this
+    #jack.enable = true;
 
-  services.home-assistant = {
-    enable = false;
-    extraComponents = [
-      # Components required to complete the onboarding
-      "esphome"
-      "met"
-      "radio_browser"
-      "soundtouch"
+    # use the example session manager (no others are packaged yet so this is enabled by default,
+    # no need to redefine it in your config for now)
+    #media-session.enable = true;
+  };
+
+  # Enable touchpad support (enabled default in most desktopManager).
+  services.libinput.enable = true;
+
+  # Define a user account. Don't forget to set a password with ‘passwd’.
+  users.users.bzizou = {
+    isNormalUser = true;
+    description = "Bruno Bzeznik";
+    extraGroups = [ "networkmanager" "dialout" "wheel" "audio" "docker" "libvirtd" ];
+    packages = with pkgs; [
+    #  thunderbird
     ];
-    config = {
-      # Includes dependencies for a basic setup
-      # https://www.home-assistant.io/integrations/default_config/
-      default_config = {};
+  };
+
+  # Install firefox.
+  programs.firefox.enable = true;
+
+  # nixpkgs config
+  nixpkgs.config = {
+    allowUnfree = true;
+
+    # NUR
+    packageOverrides = pkgs: {
+      nur = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {
+        inherit pkgs;
+      };
     };
   };
 
-  # Enable sound.
-  sound.enable = true;
-  hardware.pulseaudio.enable = true;
-
-  # Enable touchpad support (enabled default in most desktopManager).
-  services.xserver.libinput.enable = true;
-
-  # enable antivirus clamav and
-  # keep the signatures' database updated
-  services.clamav.daemon.enable = true;
-  services.clamav.updater.enable = true;
-  services.clamav.daemon.settings = {
-    LogFile = "/var/log/clamav.log";
+  # Build options
+  nix.settings.max-jobs = 2;
+  nix.settings.cores = 4;
+  nix.settings.sandbox = true;
+  nix.settings = {
+     trusted-substituters = [ "http://nix-binary-cache.u-ga.fr/nix.cache" "http://ciment-grid.univ-grenoble-alpes.fr/nix.cache" "https://cache.nixos.org/" "https://gricad.cachix.org" ];
+     require-sigs = false;
+     tarball-ttl = 0;
+     substituters = [ "http://nix-binary-cache.u-ga.fr/nix.cache" "https://cache.nixos.org" "https://cache.nixos.org/"  "https://gricad.cachix.org" ];
   };
 
+  # Extra options
+  nix.extraOptions = ''
+    trusted-users = root xxxxxxx
+    experimental-features = nix-command flakes
+  '';
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  # users.users.jane = {
-  #   isNormalUser = true;
-  #   extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
-  # };
+  # Virtualbox
+  virtualisation.virtualbox.host.enable = false;
 
-  users.extraUsers.bzizou = {
-    extraGroups = [ "audio" "docker" "wheel" ];
-    isNormalUser = true;
+  # Docker
+  virtualisation.docker.enable = true;
+
+  # Enable the OpenSSH daemon.
+  services.openssh.enable = true;
+  services.openssh.settings.X11Forwarding = true;
+
+  # Open ports in the firewall.
+  networking.firewall.allowedTCPPorts = [ xxx xxx ];
+  networking.firewall.allowedUDPPorts = [ xxx xxx ];
+  # Or disable the firewall altogether.
+  # networking.firewall.enable = false;
+
+  # NFS client
+  services.rpcbind.enable = true;
+
+  # Some programs need SUID wrappers, can be configured further or are
+  # started in user sessions.
+  # programs.mtr.enable = true;
+  programs.gnupg.agent = {
+     enable = true;
+     enableSSHSupport = true;
   };
+ 
+  # Fingerprint reader
+  services.fprintd.enable = true;
+  services.fprintd.tod.enable = true;
+  services.fprintd.tod.driver = pkgs.libfprint-2-tod1-broadcom;
 
+  # Firwmares
+  hardware.enableAllFirmware = true;
+  services.fwupd.enable = true;
+ 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+  #  wget
+     gh
+     cadaver
+     keepassxc
+     ganttproject-bin
+     jq
+     hello
+     remmina
+     python3
+     ccid
+     hw-probe
+     lshw
+     usbutils
+     just
+     virt-manager
+     guestfs-tools
+     reveal-md
      kstars
      indi-full
      ffmpeg
@@ -158,14 +274,14 @@
      arduino
      mkspiffs-presets.arduino-esp32
      arduino-mk
-     hardinfo
+     hardinfo2
      keepass
      handlr
      slack
      xorg.libxcb
      libGL
      appimage-run
-     cura
+     #cura
      blender
      hugo
      p7zip
@@ -173,7 +289,7 @@
      nextcloud-client
      siril
      s-tui
-     kdenlive
+     kdePackages.kdenlive
      irssi
      texmaker
      texlive.combined.scheme-full
@@ -188,22 +304,21 @@
      gnumake
      wol
      signal-desktop
-     gnome.gnome-tweaks
+     gnome-tweaks
      htop
      #adobeReader
      bfg-repo-cleaner
-     firefox
+     #firefox
      xsel
      ecryptfs
-     ecryptfs-helper
      keyutils
-     v4l_utils
+     v4l-utils
      uvcdynctrl
      guvcview
      qemu_kvm
      nfs-utils
      rpcbind
-     vimPlugins.pathogen 
+     vimPlugins.pathogen
      vimPlugins.vim-markdown
      vimPlugins.editorconfig-vim
      ethtool
@@ -216,7 +331,6 @@
      powertop
      openssh
      dmidecode
-     chromium
      google-chrome
      thunderbird
      firefox
@@ -260,98 +374,51 @@
      imagemagick
      unetbootin
      unrar
-     xournal
-     gnome3.cheese
+     xournalpp
+     cheese
      at
      hplip
      openconnect
      networkmanager-openconnect
      parted
-     mesa.drivers
      mesa
      pavucontrol
      ofono-phonesim
      glib-networking
      #nur.repos.shamilton.vokoscreen-ng
      obs-studio
+     black
+     telegram-desktop
+     audio-recorder
   ];
 
   # Unsecure packages
-  nixpkgs.config.permittedInsecurePackages = [
-    "adobe-reader-9.5.5-1"
-    "python-2.7.18.6" 
-       ];
-
+  #nixpkgs.config.permittedInsecurePackages = [
+  #  "xxxxxxxxxxx"
+  #  "xxxxxxxxxxxx"
+  #     ];
 
   # Environment variables
   environment.variables.EDITOR = "vim";
 
-  # Default aliases
-  programs.bash.shellAliases = {
-    l = "ls -alh";
-    ll = "ls -l";
-    ls = "ls --color=tty";
-    vi = "vim";
-  };
-
-  # nixpkgs config
-  nixpkgs.config = {
-    allowUnfree = true;
- 
-    # NUR
-    packageOverrides = pkgs: {
-      nur = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {
-        inherit pkgs;
-      };
-    };
-  };
-
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
-  programs.gnupg.agent = {
-     enable = true;
-     enableSSHSupport = true;
-  };
+  # programs.gnupg.agent = {
+  #   enable = true;
+  #   enableSSHSupport = true;
+  # };
 
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
-  services.openssh.enable = true;
+  # services.openssh.enable = true;
 
   # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [ 139 445 ];
-  networking.firewall.allowedUDPPorts = [ 137 138 ];
+  # networking.firewall.allowedTCPPorts = [ ... ];
+  # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
-
-  # NFS client
-  services.rpcbind.enable = true;
-
-  # DNS forwarder
-  #services.bind.enable = true;
-
-  # Build options
-  nix.settings.max-jobs = 8;
-  nix.settings.sandbox = true;
-  nix.settings = {
-     trusted-substituters = [ "http://nix-binary-cache.u-ga.fr/nix.cache" "http://ciment-grid.univ-grenoble-alpes.fr/nix.cache" "https://cache.nixos.org/" "https://gricad.cachix.org" ];
-     require-sigs = false;
-     tarball-ttl = 0;
-     substituters = [ "http://nix-binary-cache.u-ga.fr/nix.cache" "https://cache.nixos.org" "https://cache.nixos.org/"  "https://gricad.cachix.org" ];
-  };
-
-  # Extra options
-  nix.extraOptions = ''
-    trusted-users = root bzizou
-    experimental-features = nix-command flakes
-  ''; 
-
-  # Virtualbox
-  virtualisation.virtualbox.host.enable = false;
-  
-  # Docker
-  virtualisation.docker.enable = true;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
@@ -359,7 +426,6 @@
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "21.05"; # Did you read the comment?
+  system.stateVersion = "24.11"; # Did you read the comment?
 
 }
-

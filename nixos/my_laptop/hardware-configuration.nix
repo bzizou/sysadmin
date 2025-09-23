@@ -9,31 +9,40 @@
     ];
 
   boot.initrd.availableKernelModules = [ "xhci_pci" "thunderbolt" "nvme" "usb_storage" "sd_mod" "rtsx_pci_sdmmc" ];
-  boot.initrd.kernelModules = [ "88x2bu" ];
-  boot.kernelModules = [ "kvm-intel" "ecryptfs" "v4l2loopback" ];
-  boot.extraModulePackages = [ config.boot.kernelPackages.rtl88x2bu config.boot.kernelPackages.v4l2loopback ];
-  boot.blacklistedKernelModules = [ "intel_rapl_msr" ];
-  boot.extraModprobeConfig = lib.mkMerge [
-    # idle audio card after one second
-    "options snd_hda_intel power_save=1"
-    # enable wifi power saving (keep uapsd off to maintain low latencies)
-    "options iwlwifi power_save=1 uapsd_disable=1"
-  ];
-
+  boot.initrd.kernelModules = [ ];
+  boot.kernelModules = [ "kvm-intel" ];
+  boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/03eb880d-5099-476e-91e4-05b2279c5cfe";
+    { device = "/dev/disk/by-uuid/e96a7f9d-c3fb-4f25-9120-d6f0c298061d";
       fsType = "ext4";
     };
 
+  boot.initrd.luks.devices."luks-d57c34a0-2cb4-493f-a112-e17ea56021e6".device = "/dev/disk/by-uuid/d57c34a0-2cb4-493f-a112-e17ea56021e6";
+
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/82CB-97F7";
+    { device = "/dev/disk/by-uuid/D4C3-717F";
       fsType = "vfat";
+      options = [ "fmask=0077" "dmask=0077" ];
     };
 
-  swapDevices = [ ];
+  fileSystems."/data" =
+    { device = "/dev/disk/by-uuid/e20974f8-f42d-42ae-9f70-0c4d73499c1b";
+      fsType = "ext4";
+    };
 
-  powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
-  # high-resolution display
-  #hardware.video.hidpi.enable = lib.mkDefault true;
+  swapDevices =
+    [ { device = "/dev/disk/by-uuid/10e74cbe-27d4-45e2-a642-48d9d486b96c"; }
+    ];
+
+  # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
+  # (the default) this is the recommended approach. When using systemd-networkd it's
+  # still possible to use this option, but it's recommended to use it in conjunction
+  # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
+  networking.useDHCP = lib.mkDefault true;
+  # networking.interfaces.enp0s31f6.useDHCP = lib.mkDefault true;
+  # networking.interfaces.wlp0s20f3.useDHCP = lib.mkDefault true;
+
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+  hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 }
