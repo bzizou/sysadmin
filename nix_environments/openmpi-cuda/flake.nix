@@ -9,7 +9,7 @@
   description = "Flake: openmpi with cuda";
 
   inputs = {
-    nixpkgs.url = "github:bzizou/nixpkgs/a33463999d9599a0c339f9df7a7ff31c39d1b799";
+    nixpkgs.url = "github:bzizou/nixpkgs/04b167bc34e45806968a3972c928c2006ccefcc6";
   };
 
   nixConfig.bash-prompt = "\\e[35m\[nix-develop (\\h)\]\\e[34m\\w\\e[39m$ ";
