@@ -22,7 +22,8 @@
       };
       shell = pkgs.mkShell rec {
         packages = with pkgs; [
-                          stdenv.cc.cc 
+                          stdenv.cc.cc
+                          ucx 
                           openmpi zlib 
                           openssl cudatoolkit
                         ];
