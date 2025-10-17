@@ -19,6 +19,7 @@
         inherit system;
         config.allowUnfree = true;
         config.cudaSupport = true;
+        config.enableCuda = true;
       };
       shell = pkgs.mkShell rec {
         packages = with pkgs; [
