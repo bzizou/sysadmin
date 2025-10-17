@@ -1,9 +1,7 @@
 # A flake for openmpi with cuda that can be called either as a dev shell:
 #   nix develop
-# It can also be installed into the profile:
-#   nix profile install
-# or (directly from github!):
-#  nix profile install github:bzizou/sysadmin?dir=nix_environments/openmpi-cuda
+# Runtime example:
+#   nix develop flakes_path/openmpi-cuda --command mpirun ...
 #
 {
   description = "Flake: openmpi with cuda";
