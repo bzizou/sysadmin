@@ -11,10 +11,10 @@
 # Also customize your pinned nixpkgs version in the inputs
 
 {
-  description = "Flake: Python 3.12.17";
+  description = "Flake: Python 3.12.18";
 
   inputs = {
-    nixpkgs.url = "github:bzizou/nixpkgs/a33463999d9599a0c339f9df7a7ff31c39d1b799";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
   };
 
   nixConfig.bash-prompt = "\\e[35m\[nix-develop (\\h)\]\\e[34m\\w\\e[39m$ ";
