@@ -4,6 +4,7 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends bash ca-certificates git ripgrep \
   && rm -rf /var/lib/apt/lists/*
 RUN npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+RUN mkdir -p /etc/nix && printf 'sandbox = false\nbuild-users-group =\n' > /etc/nix/nix.conf
 
 WORKDIR /workspace
 ENTRYPOINT ["pi"]
